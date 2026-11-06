@@ -1,0 +1,26 @@
+ALTER TABLE public.users ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.students ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.enrollments ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.attempts ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.submissions ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.ai_sessions ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.ai_interactions ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.messages ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.verification_runs ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.verification_responses ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.learning_events ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.evidence_candidates ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.risk_signals ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.student_concept_state ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY users_self_select ON public.users FOR SELECT USING (auth_user_id = auth.uid());
+CREATE POLICY students_self_select ON public.students FOR SELECT USING (student_id IN (SELECT user_id FROM public.users WHERE auth_user_id = auth.uid()));
+CREATE POLICY attempts_self_select ON public.attempts FOR SELECT USING (student_id IN (SELECT user_id FROM public.users WHERE auth_user_id = auth.uid()));
+CREATE POLICY ai_sessions_self_select ON public.ai_sessions FOR SELECT USING (student_id IN (SELECT user_id FROM public.users WHERE auth_user_id = auth.uid()));
+CREATE POLICY ai_interactions_self_select ON public.ai_interactions FOR SELECT USING (student_id IN (SELECT user_id FROM public.users WHERE auth_user_id = auth.uid()));
+CREATE POLICY verification_runs_self_select ON public.verification_runs FOR SELECT USING (student_id IN (SELECT user_id FROM public.users WHERE auth_user_id = auth.uid()));
+CREATE POLICY verification_responses_self_select ON public.verification_responses FOR SELECT USING (student_id IN (SELECT user_id FROM public.users WHERE auth_user_id = auth.uid()));
+CREATE POLICY learning_events_self_select ON public.learning_events FOR SELECT USING (student_id IN (SELECT user_id FROM public.users WHERE auth_user_id = auth.uid()));
+CREATE POLICY evidence_candidates_self_select ON public.evidence_candidates FOR SELECT USING (student_id IN (SELECT user_id FROM public.users WHERE auth_user_id = auth.uid()));
+CREATE POLICY risk_signals_self_select ON public.risk_signals FOR SELECT USING (student_id IN (SELECT user_id FROM public.users WHERE auth_user_id = auth.uid()));
+CREATE POLICY student_concept_state_self_select ON public.student_concept_state FOR SELECT USING (student_id IN (SELECT user_id FROM public.users WHERE auth_user_id = auth.uid()));

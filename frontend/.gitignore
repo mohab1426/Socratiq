@@ -1,0 +1,3 @@
+
+# Excalidraw fonts are copied from node_modules by scripts/copy-excalidraw-assets.mjs
+public/excalidraw-assets/

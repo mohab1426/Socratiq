@@ -1,0 +1,140 @@
+@import "tailwindcss";
+
+@theme {
+  /* Typography */
+  --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  /* Serif with real Greek support (designed for scholarly Greek + Latin). Used only for the wordmark and landing headlines. */
+  --font-serif: "Gentium Book Plus", "Iowan Old Style", "Palatino Linotype", Georgia, serif;
+
+  /* Core palette — Palette #2 (olive / sage / peach / orange), final approved direction */
+  --color-canvas: #ffe7db;          /* page background, warm peach */
+  --color-surface: #ffffff;         /* cards, panels */
+  --color-surface-muted: #ffeee6;   /* subtle recessed surface */
+
+  --color-ink: #141102;             /* primary text, near-black olive */
+  --color-ink-soft: #68665c;        /* secondary text (AA on white, canvas and surface-muted) */
+  --color-ink-faint: #a6a59f;       /* DECORATIVE ONLY (separators, idle dots, disabled glyphs). Never for text or placeholders: it is 2.5:1 on white. */
+  --color-ink-muted: #5f5d53;       /* small text that must stay readable (AA on canvas + white); use instead of ink-soft/faint for helper copy */
+
+  --color-border: #d9dbc1;          /* hairline borders */
+  --color-border-strong: #babd8e;   /* dividers and chip outlines (decorative) */
+  --color-control-border: #80834f;  /* boundary of inputs, selects and textareas: >= 3:1 on white and canvas (WCAG 1.4.11) */
+
+  --color-plum: #fa9500;            /* primary brand / CTA — orange */
+  --color-plum-dark: #eb6424;
+  --color-plum-light: #feecd1;
+
+  --color-teal: #babd8e;            /* secondary accent — sage */
+  --color-teal-dark: #7c690a;
+  --color-teal-light: #f0f0e6;
+
+  --color-slate: #a4a060;           /* tertiary accent, muted olive-sage */
+  --color-slate-light: #edecdf;
+
+  --color-clay: #eb6424;            /* course card variant — red-orange */
+  --color-clay-light: #fbe3d8;
+
+  --color-on-plum: #141102;         /* text color placed on top of --color-plum / --color-plum-dark (contrast-checked) */
+  --color-on-teal: #141102;         /* text color placed on top of --color-teal (contrast-checked) */
+
+  --color-success: #6f9a7b;
+  --color-success-light: #e6f0e6;
+  --color-warning: #c98a4b;
+  --color-warning-light: #f6e9db;
+  --color-danger: #b96b64;
+  --color-danger-light: #f5e4e2;
+
+  /* Darker text tones for small text on the tinted *-light surfaces above (the base tones are too pale for AA on them) */
+  --color-success-ink: #3f6b4d;
+  --color-warning-ink: #8a5a1e;
+  --color-danger-ink: #8f4a44;
+
+  --shadow-panel: 0 1px 2px rgb(20 17 2 / 0.05);
+  --radius-sm: 0.5rem;
+  --radius-md: 0.75rem;
+  --radius-lg: 1rem;
+  --radius-xl: 1.25rem;
+}
+
+html, body, #root {
+  height: 100%;
+}
+
+body {
+  background-color: var(--color-canvas);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* In @layer base so Tailwind's border-color utilities can override it (unlayered CSS always wins over utilities). */
+@layer base {
+  * {
+    border-color: var(--color-border);
+  }
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-teal-dark);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Thin scrollbar for chat + tables */
+.thin-scroll::-webkit-scrollbar { width: 6px; height: 6px; }
+.thin-scroll::-webkit-scrollbar-thumb { background: var(--color-border-strong); border-radius: 999px; }
+
+/* ------------------------------------------------------------------ motion */
+html { scroll-behavior: auto; }
+@media (prefers-reduced-motion: no-preference) {
+  html { scroll-behavior: smooth; }
+}
+
+/* Scroll reveal: <Reveal> flips data-visible once the element enters the viewport. */
+.reveal {
+  opacity: 0;
+  transform: translateY(14px);
+  transition: opacity 600ms cubic-bezier(0.2, 0.7, 0.2, 1) var(--reveal-delay, 0ms),
+    transform 600ms cubic-bezier(0.2, 0.7, 0.2, 1) var(--reveal-delay, 0ms);
+}
+.reveal[data-visible="true"] { opacity: 1; transform: none; }
+
+/* One-time entrance for the hero on load */
+@keyframes rise-in {
+  from { opacity: 0; transform: translateY(18px); }
+  to { opacity: 1; transform: none; }
+}
+.rise-in { animation: rise-in 700ms cubic-bezier(0.2, 0.7, 0.2, 1) both; animation-delay: var(--rise-delay, 0ms); }
+
+/* Slow, low-contrast light behind the hero */
+@keyframes drift {
+  0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
+  50% { transform: translate3d(4%, -3%, 0) scale(1.06); }
+}
+.drift { animation: drift 26s ease-in-out infinite; }
+
+/* Hero cards: a barely-there float around their resting tilt */
+@keyframes float-soft {
+  0%, 100% { transform: translateY(0) rotate(var(--tilt, 0deg)); }
+  50% { transform: translateY(-6px) rotate(var(--tilt, 0deg)); }
+}
+.float-soft { transform: rotate(var(--tilt, 0deg)); animation: float-soft 7s ease-in-out infinite; animation-delay: var(--float-delay, 0ms); }
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal { opacity: 1; transform: none; transition: none; }
+  .rise-in, .drift, .float-soft { animation: none; }
+  .rise-in { opacity: 1; }
+}
+
+/* Smart board: coach-written elements appear one after another, like a teacher writing at a whiteboard. */
+@keyframes sb-appear { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+.sb-appear { animation: sb-appear 0.5s ease-out both; }
+@media (prefers-reduced-motion: reduce) { .sb-appear { animation: none; } }

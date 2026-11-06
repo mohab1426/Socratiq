@@ -1,0 +1,28 @@
+# secrets: never commit
+.env
+.env.*
+!.env.example
+**/.env
+**/.env.*
+!**/.env.example
+
+# python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.venv/
+venv/
+
+# node
+node_modules/
+dist/
+
+# local data (uploaded files, RAG smoke-test artifacts)
+data/uploads/
+data/rag_documents/
+ai/data/
+ai/tests/data/
+scripts/bin/
+scripts/*.log
+scripts/*.pid

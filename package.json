@@ -1,0 +1,10 @@
+{
+  "name": "socratiq",
+  "private": true,
+  "description": "Convenience scripts. The frontend lives in frontend/socratiq; the API is Python (see README.md).",
+  "scripts": {
+    "frontend:install": "npm --prefix frontend/socratiq ci",
+    "frontend:dev": "npm --prefix frontend/socratiq run dev",
+    "frontend:build": "npm --prefix frontend/socratiq run build"
+  }
+}

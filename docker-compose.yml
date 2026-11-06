@@ -1,0 +1,59 @@
+# Local full stack:  docker compose up --build
+#   web  -> http://localhost:5173      api -> http://localhost:8000/docs
+# Auth and Storage still come from a Supabase project (set SUPABASE_* in .env); the bundled Postgres is for the data layer.
+services:
+  db:
+    image: pgvector/pgvector:pg16
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-socratiq}
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
+    ports: ["127.0.0.1:${POSTGRES_PORT:-5432}:5432"]   # bound to localhost only
+    volumes: [pgdata:/var/lib/postgresql/data]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-socratiq}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  migrate:
+    build: .
+    depends_on: { db: { condition: service_healthy } }
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-socratiq}
+    # A plain Postgres has no Supabase `auth` schema/roles, so create minimal stand-ins first (skipped on real Supabase).
+    command: python database/run_migrations.py --local-supabase-stub
+    restart: "no"
+
+  backend:
+    build: .
+    restart: unless-stopped
+    depends_on:
+      db: { condition: service_healthy }
+      migrate: { condition: service_completed_successfully }
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-socratiq}
+      ENVIRONMENT: ${ENVIRONMENT:-development}
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:5173}
+      PUBLIC_API_URL: ${PUBLIC_API_URL:-http://localhost:8000}
+    ports: ["${BACKEND_PORT:-8000}:8000"]
+    volumes: [uploads:/app/data/uploads]
+
+  web:
+    build:
+      context: frontend
+      args:
+        VITE_API_URL: ${PUBLIC_API_URL:-http://localhost:8000}
+        VITE_SUPABASE_URL: ${SUPABASE_URL:-}
+        VITE_SUPABASE_ANON_KEY: ${SUPABASE_ANON_KEY:-}
+    restart: unless-stopped
+    depends_on: [backend]
+    ports: ["${WEB_PORT:-5173}:80"]
+
+volumes:
+  pgdata:
+  uploads:
